@@ -1,0 +1,21 @@
+import capos.*
+describe "Rolando encuentra artefactos" {
+    test "Rolando recolecta un artefacto" {
+        rolando.encontrar(espadaDelDestino) // arrange (set up inicial)
+        assert.equals(1, rolando.artefactos().size()) //act excersise
+        assert.that(rolando.artefactos().contains(espadaDelDestino))
+
+    }
+}
+
+
+describe "Rolando y sus poseciones" {
+    test "Quiero saber si puedo saber el total de las poseciones de Rolando y si tiene una en espefico" {
+        rolando.encontrar(espadaDelDestino)
+        rolando.encontrar(armaduraDeAcero)
+        rolando.llegarA(castillo)
+        rolando.encontrar(collarDivino)
+        assert.equals(3, rolando.poseciones(castillo).size())
+        assert.that( rolando.poseciones(castillo).contains(espadaDelDestino))
+    }
+}
