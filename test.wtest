@@ -1,0 +1,157 @@
+import capos.*
+import artefactos.*
+import moradas.*
+import enemigos.*
+
+
+describe "Rolando encuentra artefactos" {
+    test "Rolando recolecta un artefacto" {
+        rolando.encontrar(espadaDelDestino)
+        rolando.encontrar(libroDeHechizos)
+        assert.equals(2, rolando.artefactos().size()) 
+        assert.that(rolando.artefactos().contains(espadaDelDestino))
+        assert.that(rolando.artefactos().contains(libroDeHechizos))
+        rolando.encontrar(collarDivino)
+        assert.notThat(rolando.artefactos().contains(collarDivino))
+    }
+}
+
+describe "Rolando deja artefactos en su morada" {
+    test "Rolando encuentra artefactos, se queda sin espacio en la mochila, los deja en su morada y recolecta mas" {
+        rolando.encontrar(espadaDelDestino)
+        rolando.encontrar(libroDeHechizos)
+        rolando.llegarA(castillo) 
+        rolando.encontrar(collarDivino) 
+        rolando.llegarA(castillo)
+        assert.equals(3, castillo.inventario().size())
+        assert.that(castillo.inventario().contains(espadaDelDestino))
+        assert.that(castillo.inventario().contains(libroDeHechizos))
+        assert.that(castillo.inventario().contains(collarDivino))
+        assert.that(rolando.artefactos().isEmpty())
+       
+
+    }
+}
+
+describe "Historial de encuentros" {
+  test "Rolando se encuentra con varios artefactos y aunque no los guarda a todos en la mochila, quedan en su historial" {
+    rolando.encontrar(espadaDelDestino)
+    rolando.encontrar(libroDeHechizos)
+    rolando.encontrar(collarDivino) 
+    rolando.llegarA(castillo) 
+    rolando.encontrar(armaduraDeAcero)
+    rolando.encontrar(collarDivino)
+    assert.equals(5, rolando.historialDeArtefactos().size())
+
+    
+  }
+}
+
+describe "Rolando y sus posesiones" {
+    test "Quiero saber si puedo saber el total de las posesiones de Rolando y si no tiene una en espefico" {
+        rolando.encontrar(espadaDelDestino)
+        rolando.encontrar(collarDivino)
+        rolando.llegarA(castillo)
+        rolando.encontrar(armaduraDeAcero)
+        assert.equals(3, rolando.posesiones().size())
+        assert.notThat( rolando.posesiones().contains(libroDeHechizos))
+    }
+}
+
+describe "Ejemplos de batalla" {
+    test "Simulando una batalla" {
+        rolando.poderBase(5) 
+        rolando.capacidadMaxima(3)
+        rolando.encontrar(espadaDelDestino)
+        rolando.encontrar(armaduraDeAcero)
+        rolando.encontrar(collarDivino)
+        assert.equals(5, espadaDelDestino.poderQueAporta(rolando))
+        assert.equals(6, armaduraDeAcero.poderQueAporta(rolando))
+        assert.equals(3, collarDivino.poderQueAporta(rolando))
+        rolando.lucharBatalla()
+        assert.equals(6, rolando.poderBase())
+        assert.equals(3, espadaDelDestino.poderQueAporta(rolando))
+        assert.equals(6, armaduraDeAcero.poderQueAporta(rolando))
+        assert.equals(3, collarDivino.poderQueAporta(rolando))
+        rolando.lucharBatalla()
+        assert.equals(7, rolando.poderBase())
+        assert.equals(3.5, espadaDelDestino.poderQueAporta(rolando))
+        assert.equals(6, armaduraDeAcero.poderQueAporta(rolando))
+        assert.equals(5, collarDivino.poderQueAporta(rolando))
+        rolando.lucharBatalla() 
+        assert.equals(8, rolando.poderBase())
+        assert.equals(4, espadaDelDestino.poderQueAporta(rolando))
+        assert.equals(6, armaduraDeAcero.poderQueAporta(rolando))
+        assert.equals(6, collarDivino.poderQueAporta(rolando))
+
+    }
+    test "Simular poder de habilidad" {
+        rolando.poderBase(5) 
+        rolando.capacidadMaxima(3) 
+        rolando.encontrar(espadaDelDestino)
+        rolando.encontrar(armaduraDeAcero)
+        rolando.encontrar(collarDivino)
+        assert.equals(19, rolando.poderDePelea())
+    }
+}
+
+describe "Testeo libro de hechizos" {
+  test "testeo hechizo por hechizo" { 
+    rolando.poderBase(5) 
+    rolando.encontrar(espadaDelDestino)
+    rolando.encontrar(armaduraDeAcero)
+    rolando.encontrar(collarDivino)
+    rolando.llegarA(castillo)
+    rolando.encontrar(libroDeHechizos)
+    libroDeHechizos.agregarHechizo(bendicion)
+    libroDeHechizos.agregarHechizo(invisibilidad)
+    libroDeHechizos.agregarHechizo(invocacion)
+    assert.equals(4, libroDeHechizos.poderQueAporta(rolando))
+    rolando.lucharBatalla()
+    assert.equals(6, libroDeHechizos.poderQueAporta(rolando))
+    rolando.lucharBatalla()
+    assert.equals(7, libroDeHechizos.poderQueAporta(rolando))
+    rolando.lucharBatalla()
+    assert.equals(0, libroDeHechizos.poderQueAporta(rolando))
+    }
+}
+
+describe "Testeo de enemigos" {
+  test "Le gana a dos y se queda con su morada" {
+    rolando.poderBase(5)
+    rolando.capacidadMaxima(3)
+    rolando.encontrar(espadaDelDestino)
+    rolando.encontrar(armaduraDeAcero)
+    rolando.encontrar(collarDivino)
+    assert.equals(19, rolando.poderDePelea())
+    assert.equals([archibaldo, astra], rolando.enemigosQuePuedeVencer([caterina,archibaldo,astra]))
+    assert.equals([palacioDeMarmol, torreDeMarfil], rolando.conquistarMoradas([caterina,archibaldo,astra]))
+  }
+}
+
+describe "Testeo sobre que tan poderoso es Rolando" {
+  test "Rolando es poderoso" {
+    rolando.poderBase(5)
+    rolando.capacidadMaxima(3)
+    rolando.encontrar(espadaDelDestino)
+    rolando.encontrar(armaduraDeAcero)
+    rolando.encontrar(collarDivino)
+    assert.notThat(rolando.esElMasPoderoso([caterina,archibaldo,astra]))
+    rolando.poderBase(10)
+    assert.that(rolando.esElMasPoderoso([caterina,archibaldo,astra]))
+
+  }
+}
+
+describe "Testeo artefacto fatal" {
+  test "puede vencer a astra pero no a caterina" {
+    rolando.poderBase(15)
+    rolando.capacidadMaxima(3)
+    rolando.encontrar(espadaDelDestino)
+    rolando.encontrar(armaduraDeAcero)
+    rolando.encontrar(collarDivino)
+    assert.that(rolando.tieneArtefactoFatalPara(astra))
+    assert.that(rolando.artefactos().contains(espadaDelDestino))
+    assert.notThat(rolando.tieneArtefactoFatalPara(caterina))
+  }
+}
