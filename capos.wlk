@@ -1,9 +1,15 @@
+import artefactos.*
+import moradas.*
+import enemigos.*
+
 object rolando {
     var capacidadMaxima = 2
-    const artefactos = #{}  // porque no cambia la referencia
+    const artefactos = #{}
     const historialDeArtefactos = []
     var poderBase = 0
- 
+    const morada = castillo 
+
+    
     method encontrar(artefacto) {
         historialDeArtefactos.add(artefacto)
         if (artefactos.size() < capacidadMaxima)
@@ -18,12 +24,15 @@ object rolando {
     method artefactos() {
         return artefactos
     }
-    method llegarA(hogar) {
-        hogar.depositarArtefactos(artefactos)
+    method llegarA(_morada) {
+        _morada.depositarArtefactos(artefactos)
         artefactos.clear()
     }
-    method poseciones(hogar) {
-        return self.artefactos().union(hogar.inventario())
+    method posesiones() {
+        return self.artefactos().union(morada.inventario())
+    }
+    method tieneArtefacto(artefacto) {
+        return self.posesiones().contains(artefacto)
     }
     method historialDeArtefactos() {
         return historialDeArtefactos
@@ -34,69 +43,42 @@ object rolando {
     method poderBase() = poderBase
 
     method poderDePelea() {
-        const poderArtefactos = ({artefacto => artefacto.poderQueAporta(self)})
-        return poderBase + poderArtefactos
+        
+        return poderBase + self.poderDeLosArtefactos()
     }
 
+    method poderDeLosArtefactos() {
+        return artefactos.sum({artefacto => artefacto.poderQueAporta(self)})
+    }
     method lucharBatalla() {
         poderBase = poderBase + 1
-        artefactos.forEach( {artefacto => artefacto.esUtilizado()})
-    }
-}
-object espadaDelDestino {
-    var fueUsada = false 
-    method poderQueAporta(personaje) {
-        if ( fueUsada ) {
-            return personaje.poderBase() / 2
-        } else {
-            return personaje.poderBase()
-        }
+        artefactos.forEach( {artefacto => artefacto.utilizar()})
     }
 
-    method esUtilizado() {
-       fueUsada = true
+      method artefactoMasPoderosoDeLaMorada() {
+        return morada.artefactoMasPoderoso(self)
     }
-}
 
-
-object libroDeHechizos {
-    const hechizos = #{}
-
-    
-}
-
-
-object collarDivino {
-    var cantidadDeUsos = 0
-    method poderQueAporta(personaje) {
-        if(personaje.poderBase() > 6) {
-            return 3 + cantidadDeUsos
-        } else {
-            return 3
-        }
+    method enemigosQuePuedeVencer(enemigos) {
+        return enemigos.filter({enemigo => self.poderDePelea() > enemigo.poderDePelea()})
     }
-    method esUtilizado() {
-       cantidadDeUsos = cantidadDeUsos + 1 
+    method conquistarMoradas(enemigos) {
+        return self.enemigosQuePuedeVencer(enemigos).map({enemigo => enemigo.morada()})
     }
+    method esElMasPoderoso(enemigos) {
+        return enemigos.all({ enemigo => self.poderDePelea() > enemigo.poderDePelea() })
+    }
+    method tieneArtefactoFatalPara(enemigo) {
+        return artefactos.any({ artefacto => artefacto.poderQueAporta(self) > enemigo.poderDePelea() })
+    }
+
+    method artefactoFatalPara(enemigo) {
+        return artefactos.find({ artefacto => artefacto.poderQueAporta(self) > enemigo.poderDePelea() })
+    }
+
+    method tieneArtefactosEnSuMorada() {
+        return morada.hayArtefactosEnLaMorada()
+    }
+
 }
 
-
-object armaduraDeAcero {
-    method poderQueAporta(personaje) {
-        return 6
-    }
-    method esUtilizado() {
-    }
-}
-
-object castillo {
-    const inventario = #{}
-
-    method depositarArtefactos(artefactos) {
-        inventario.addAll(artefactos)
-
-    }
-    method inventario() {
-        return inventario 
-    }
-}
